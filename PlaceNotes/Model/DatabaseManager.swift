@@ -136,4 +136,149 @@ class DatabaseManager {
         sqlite3_finalize(insertStatement)
         return true
     }
+
+    // Updates the value of a particular `Place` entry. Returns whether the operation was successful.
+    func updatePlace(_ place: Place) -> Bool {
+        let updateString = """
+            UPDATE \(placesTable)
+            SET Name = ?, Latitude = ?, Longitude = ?, Postcode = ?, Categories = ?, Favourite = ?
+            WHERE PlaceID = ?;
+        """
+        var updateStatement: OpaquePointer? = nil
+
+        guard sqlite3_prepare_v2(dbPointer, updateString, -1, &updateStatement, nil) == SQLITE_OK else {
+            return false
+        }
+
+        sqlite3_bind_text(updateStatement, 1, place.name, -1, nil)
+        sqlite3_bind_double(updateStatement, 2, place.latitude)
+        sqlite3_bind_double(updateStatement, 3, place.longitude)
+        sqlite3_bind_text(updateStatement, 4, place.postcode, -1, nil)
+        sqlite3_bind_text(updateStatement, 5, place.categories.joined(separator: ","), -1, nil)
+        sqlite3_bind_int(updateStatement, 6, place.isFavourite ? 1 : 0)
+        sqlite3_bind_int64(updateStatement, 7, Int64(place.id))
+
+        guard sqlite3_step(updateStatement) == SQLITE_DONE else {
+            return false
+        }
+        sqlite3_finalize(updateStatement)
+        return true
+    }
+
+    // Updates the value of a particular `Note` entry. Returns whether the operation was successful.
+    func updateNote(_ note: Note) -> Bool {
+        let updateString = """
+            UPDATE \(notesTable)
+            SET Title = ?, Description = ?, Date = ?, PlaceID = ?
+            WHERE NoteID = ?;
+        """
+        var updateStatement: OpaquePointer? = nil
+
+        guard sqlite3_prepare_v2(dbPointer, updateString, -1, &updateStatement, nil) == SQLITE_OK else {
+            return false
+        }
+
+        sqlite3_bind_text(updateStatement, 1, note.title, -1, nil)
+        sqlite3_bind_text(updateStatement, 2, note.description, -1, nil)
+        sqlite3_bind_text(updateStatement, 3, dateFormatter.string(from: note.date), -1, nil)
+        sqlite3_bind_int64(updateStatement, 4, Int64(note.placeID))
+        sqlite3_bind_int64(updateStatement, 5, Int64(note.id))
+
+        guard sqlite3_step(updateStatement) == SQLITE_DONE else {
+            return false
+        }
+        sqlite3_finalize(updateStatement)
+        return true
+    }
+
+    func deleteNote(by id: Int) -> Bool {
+        let deleteString = """
+            DELETE FROM \(notesTable)
+            WHERE NoteID = ?;
+        """
+        var deleteStatement: OpaquePointer? = nil
+
+        guard sqlite3_prepare_v2(dbPointer, deleteString, -1, &deleteStatement, nil) == SQLITE_OK else {
+            return false
+        }
+
+        sqlite3_bind_int64(deleteStatement, 1, Int64(id))
+
+        guard sqlite3_step(deleteStatement) == SQLITE_DONE else {
+            return false
+        }
+        sqlite3_finalize(deleteStatement)
+        return true
+    }
+
+    func clearUnusedPlaces() -> Bool {
+        let deleteString = """
+            DELETE FROM \(placesTable)
+            WHERE PlaceID NOT IN (SELECT DISTINCT PlaceID FROM \(notesTable));
+        """
+        var deleteStatement: OpaquePointer? = nil
+
+        guard sqlite3_prepare_v2(dbPointer, deleteString, -1, &deleteStatement, nil) == SQLITE_OK else {
+            return false
+        }
+        guard sqlite3_step(deleteStatement) == SQLITE_DONE else {
+            return false
+        }
+        sqlite3_finalize(deleteStatement)
+        return true
+    }
+
+    func fetchAllPlaces() -> [Place]? {
+        let selectString = "SELECT * FROM \(placesTable);"
+        var selectStatement: OpaquePointer? = nil
+        var places: [Place] = []
+
+        guard sqlite3_prepare_v2(dbPointer, selectString, -1, &selectStatement, nil) == SQLITE_OK else {
+            return nil
+        }
+
+        while sqlite3_step(selectStatement) == SQLITE_ROW {
+            let placeId = Int(sqlite3_column_int64(selectStatement, 0))
+            let name = String(cString: sqlite3_column_text(selectStatement, 1))
+            let latitude = sqlite3_column_double(selectStatement, 2)
+            let longitude = sqlite3_column_double(selectStatement, 3)
+            let postcode = String(cString: sqlite3_column_text(selectStatement, 4))
+            let categories = String(cString: sqlite3_column_text(selectStatement, 5)).split(separator: ",").map { String($0) }
+            let isFavourite = sqlite3_column_int(selectStatement, 6) != 0
+            let place = Place(
+                id: placeId,
+                name: name,
+                latitude: latitude,
+                longitude: longitude,
+                postcode: postcode,
+                categories: categories,
+                isFavourite: isFavourite)
+            places.append(place)
+        }
+        sqlite3_finalize(selectStatement)
+        return places
+    }
+
+    func fetchAllNotes() -> [Note]? {
+        let selectString = "SELECT * FROM \(notesTable);"
+        var selectStatement: OpaquePointer? = nil
+        var notes: [Note] = []
+
+        guard sqlite3_prepare_v2(dbPointer, selectString, -1, &selectStatement, nil) == SQLITE_OK else {
+            return nil
+        }
+
+        while sqlite3_step(selectStatement) == SQLITE_ROW {
+            let noteId = Int(sqlite3_column_int64(selectStatement, 0))
+            let title = String(cString: sqlite3_column_text(selectStatement, 1))
+            let description = String(cString: sqlite3_column_text(selectStatement, 2))
+            let dateString = String(cString: sqlite3_column_text(selectStatement, 3))
+            let date = dateFormatter.date(from: dateString) ?? Date()
+            let placeId = Int(sqlite3_column_int64(selectStatement, 4))
+            let note = Note(id: noteId, title: title, description: description, date: date, placeID: placeId)
+            notes.append(note)
+        }
+        sqlite3_finalize(selectStatement)
+        return notes
+    }
 }
