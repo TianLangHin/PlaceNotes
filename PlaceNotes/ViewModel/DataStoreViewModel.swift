@@ -10,7 +10,15 @@ import Foundation
 class DataStoreViewModel: ObservableObject {
     let dbManager = DatabaseManager()
 
-    func insertPlace(_ place: Place) -> Bool {
+    @Published var places: [Place] = []
+    @Published var notes: [Note] = []
+
+    init() {
+        self.refreshAllPlaces()
+        self.refreshAllNotes()
+    }
+
+    func addPlace(_ place: Place) -> Bool {
         self.dbManager.insertPlace(place)
     }
 
@@ -30,12 +38,14 @@ class DataStoreViewModel: ObservableObject {
         self.dbManager.clearUnusedPlaces()
     }
 
-    func fetchAllPlaces() -> [Place]? {
-        self.dbManager.fetchAllPlaces()
+    func refreshAllPlaces() {
+        self.places = self.dbManager.fetchAllPlaces() ?? []
+        Place.resetCounter(to: self.places.map { $0.id }.max() ?? 0)
     }
 
-    func fetchAllNotes() -> [Note]? {
-        self.dbManager.fetchAllNotes()
+    func refreshAllNotes() {
+        self.notes = self.dbManager.fetchAllNotes() ?? []
+        Note.resetCounter(to: self.notes.map { $0.id }.max() ?? 0)
     }
 
     func clearAllNotes() -> Bool {
