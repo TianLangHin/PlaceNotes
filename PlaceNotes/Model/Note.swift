@@ -5,6 +5,8 @@
 //  Created by Tian Lang Hin on 23/9/2025.
 //
 
+import Foundation
+
 struct Note: Identifiable, IdGeneratable {
     let id: Int
     var title: String

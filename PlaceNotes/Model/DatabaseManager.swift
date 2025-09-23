@@ -67,13 +67,15 @@ class DatabaseManager {
         // Secondly, the `Notes` table is created if it does not exist already.
         let notesTableString = """
             CREATE TABLE IF NOT EXISTS \(notesTable) (
-                NoteID INTEGER NOT NULL PRIMARY KEY,
+                NoteID INTEGER PRIMARY KEY,
                 Title TEXT,
                 Description TEXT,
                 Date TEXT,
-                PlaceID INTEGER FOREIGN KEY REFERENCES \(placesTable)(PlaceID)
+                PlaceID INTEGER,
+                FOREIGN KEY(PlaceID) REFERENCES \(placesTable)(PlaceID)
             );
         """
+        // PlaceID INTEGER FOREIGN KEY REFERENCES \(placesTable)(PlaceID)
         var notesTableStatement: OpaquePointer? = nil
         guard sqlite3_prepare_v2(dbPointer, notesTableString, -1, &notesTableStatement, nil) == SQLITE_OK else {
             self.success = false
@@ -117,7 +119,10 @@ class DatabaseManager {
 
     // Inserts a new `Note` instance into the `Notes` table. Returns whether the operation was successful.
     func insertNote(_ note: Note) -> Bool {
-        let insertString = "INSERT INTO \(notesTable) (NoteID, Title, Description, Date, PlaceID) VALUES (?, ?, ?, ?, ?);"
+        let insertString = """
+            INSERT INTO \(notesTable) (NoteID, Title, Description, Date, PlaceID)
+            VALUES (?, ?, ?, ?, ?);
+        """
         var insertStatement: OpaquePointer? = nil
 
         guard sqlite3_prepare_v2(dbPointer, insertString, -1, &insertStatement, nil) == SQLITE_OK else {
@@ -218,6 +223,19 @@ class DatabaseManager {
         """
         var deleteStatement: OpaquePointer? = nil
 
+        guard sqlite3_prepare_v2(dbPointer, deleteString, -1, &deleteStatement, nil) == SQLITE_OK else {
+            return false
+        }
+        guard sqlite3_step(deleteStatement) == SQLITE_DONE else {
+            return false
+        }
+        sqlite3_finalize(deleteStatement)
+        return true
+    }
+
+    func clearAllNotes() -> Bool {
+        let deleteString = "DELETE FROM \(notesTable);"
+        var deleteStatement: OpaquePointer? = nil
         guard sqlite3_prepare_v2(dbPointer, deleteString, -1, &deleteStatement, nil) == SQLITE_OK else {
             return false
         }
