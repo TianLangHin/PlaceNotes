@@ -14,7 +14,6 @@ struct MapExploreView: View {
     @State var resultsText = "Start searching to find cities!"
     @State var locationSelection: LocationCategory? = nil
     @State var lastQuery: [IdWrapper<CityData>] = []
-    @State var isShowingSheet = false
 
     @State var selectedPlace: PlaceAnnotation? = nil
 
@@ -23,7 +22,6 @@ struct MapExploreView: View {
 
     var body: some View {
         VStack {
-            Text("\(isShowingSheet)")
             VStack {
                 HStack {
                     TextField("City name", text: $citySearch)
@@ -89,26 +87,18 @@ struct MapExploreView: View {
                             switch annotation.mapPoint {
                             case let .place(place):
                                 Marker(coordinate: annotation.coordinate) {
-                                    Button {
-                                        isShowingSheet.toggle()
-                                    } label: {
-                                        VStack {
-                                            let img = place.isFavourite ? "heart" : "bookmark"
-                                            Image(systemName: "\(img).fill")
-                                            Text(annotation.mapPoint.name)
-                                        }
+                                    VStack {
+                                        let img = place.isFavourite ? "heart" : "bookmark"
+                                        Image(systemName: "\(img).fill")
+                                        Text(annotation.mapPoint.name)
                                     }
                                 }
                                 .tint(.red)
                             case .location:
                                 Marker(coordinate: annotation.coordinate) {
-                                    Button {
-                                        isShowingSheet.toggle()
-                                    } label: {
-                                        VStack {
-                                            Image(systemName: "circle")
-                                            Text(annotation.mapPoint.name)
-                                        }
+                                    VStack {
+                                        Image(systemName: "circle")
+                                        Text(annotation.mapPoint.name)
                                     }
                                 }
                                 .tint(.orange)

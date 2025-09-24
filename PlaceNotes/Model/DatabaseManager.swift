@@ -15,6 +15,8 @@ class DatabaseManager {
     let notesTable = "Notes"
     let dateFormatter = DateFormatter.iso()
 
+    let SQLITE_TRANSIENT = unsafeBitCast(OpaquePointer(bitPattern: -1), to: sqlite3_destructor_type.self)
+
     var success: Bool
 
     init() {
@@ -92,8 +94,8 @@ class DatabaseManager {
     // Inserts a new `Place` instance into the `Places` table. Returns whether the operation was successful.
     func insertPlace(_ place: Place) -> Bool {
         let insertString = """
-            INSERT INTO \(placesTable) (PlaceID, Name, Latitude, Longitude, Postcode, Categories, Favourite)
-            VALUES (?, ?, ?, ?, ?, ?, ?);
+            INSERT INTO \(placesTable) (PlaceID, Name, Latitude, Longitude, Categories, Favourite)
+            VALUES (?, ?, ?, ?, ?, ?);
         """
         var insertStatement: OpaquePointer? = nil
 
@@ -102,10 +104,10 @@ class DatabaseManager {
         }
 
         sqlite3_bind_int64(insertStatement, 1, Int64(place.id))
-        sqlite3_bind_text(insertStatement, 2, place.name, -1, nil)
+        sqlite3_bind_text(insertStatement, 2, place.name, -1, SQLITE_TRANSIENT)
         sqlite3_bind_double(insertStatement, 3, place.latitude)
         sqlite3_bind_double(insertStatement, 4, place.longitude)
-        sqlite3_bind_text(insertStatement, 5, place.categories.joined(separator: ","), -1, nil)
+        sqlite3_bind_text(insertStatement, 5, place.categories.joined(separator: ","), -1, SQLITE_TRANSIENT)
         sqlite3_bind_int(insertStatement, 6, place.isFavourite ? 1 : 0)
 
         guard sqlite3_step(insertStatement) == SQLITE_DONE else {
@@ -128,9 +130,9 @@ class DatabaseManager {
         }
 
         sqlite3_bind_int64(insertStatement, 1, Int64(note.id))
-        sqlite3_bind_text(insertStatement, 2, note.title, -1, nil)
-        sqlite3_bind_text(insertStatement, 3, note.description, -1, nil)
-        sqlite3_bind_text(insertStatement, 4, dateFormatter.string(from: note.date), -1, nil)
+        sqlite3_bind_text(insertStatement, 2, note.title, -1, SQLITE_TRANSIENT)
+        sqlite3_bind_text(insertStatement, 3, note.description, -1, SQLITE_TRANSIENT)
+        sqlite3_bind_text(insertStatement, 4, dateFormatter.string(from: note.date), -1, SQLITE_TRANSIENT)
         sqlite3_bind_int64(insertStatement, 5, Int64(note.placeID))
 
         guard sqlite3_step(insertStatement) == SQLITE_DONE else {
@@ -144,7 +146,7 @@ class DatabaseManager {
     func updatePlace(_ place: Place) -> Bool {
         let updateString = """
             UPDATE \(placesTable)
-            SET Name = ?, Latitude = ?, Longitude = ?, Postcode = ?, Categories = ?, Favourite = ?
+            SET Name = ?, Latitude = ?, Longitude = ?, Categories = ?, Favourite = ?
             WHERE PlaceID = ?;
         """
         var updateStatement: OpaquePointer? = nil
@@ -153,10 +155,10 @@ class DatabaseManager {
             return false
         }
 
-        sqlite3_bind_text(updateStatement, 1, place.name, -1, nil)
+        sqlite3_bind_text(updateStatement, 1, place.name, -1, SQLITE_TRANSIENT)
         sqlite3_bind_double(updateStatement, 2, place.latitude)
         sqlite3_bind_double(updateStatement, 3, place.longitude)
-        sqlite3_bind_text(updateStatement, 4, place.categories.joined(separator: ","), -1, nil)
+        sqlite3_bind_text(updateStatement, 4, place.categories.joined(separator: ","), -1, SQLITE_TRANSIENT)
         sqlite3_bind_int(updateStatement, 5, place.isFavourite ? 1 : 0)
         sqlite3_bind_int64(updateStatement, 6, Int64(place.id))
 
@@ -180,9 +182,9 @@ class DatabaseManager {
             return false
         }
 
-        sqlite3_bind_text(updateStatement, 1, note.title, -1, nil)
-        sqlite3_bind_text(updateStatement, 2, note.description, -1, nil)
-        sqlite3_bind_text(updateStatement, 3, dateFormatter.string(from: note.date), -1, nil)
+        sqlite3_bind_text(updateStatement, 1, note.title, -1, SQLITE_TRANSIENT)
+        sqlite3_bind_text(updateStatement, 2, note.description, -1, SQLITE_TRANSIENT)
+        sqlite3_bind_text(updateStatement, 3, dateFormatter.string(from: note.date), -1, SQLITE_TRANSIENT)
         sqlite3_bind_int64(updateStatement, 4, Int64(note.placeID))
         sqlite3_bind_int64(updateStatement, 5, Int64(note.id))
 

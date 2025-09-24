@@ -19,23 +19,33 @@ class DataStoreViewModel: ObservableObject {
     }
 
     func addPlace(_ place: Place) -> Bool {
-        self.dbManager.insertPlace(place)
+        let success = self.dbManager.insertPlace(place)
+        self.refresh()
+        return success
     }
 
     func addNote(_ note: Note) -> Bool {
-        self.dbManager.insertNote(note)
+        let success = self.dbManager.insertNote(note)
+        self.refresh()
+        return success
     }
 
     func updatePlace(_ place: Place) -> Bool {
-        self.dbManager.updatePlace(place)
+        let success = self.dbManager.updatePlace(place)
+        self.refresh()
+        return success
     }
 
     func deleteNote(by id: Int) -> Bool {
-        self.dbManager.deleteNote(by: id)
+        let success = self.dbManager.deleteNote(by: id)
+        self.refresh()
+        return success
     }
 
     func clearUnusedPlaces() -> Bool {
-        self.dbManager.clearUnusedPlaces()
+        let success = self.dbManager.clearUnusedPlaces()
+        self.refresh()
+        return success
     }
 
     func refreshAllPlaces() {
@@ -48,6 +58,11 @@ class DataStoreViewModel: ObservableObject {
         Note.resetCounter(to: self.notes.map { $0.id }.max() ?? 0)
     }
 
+    func refresh() {
+        self.refreshAllPlaces()
+        self.refreshAllNotes()
+    }
+
     func clearAllNotes() -> Bool {
         self.dbManager.clearAllNotes()
     }
@@ -55,7 +70,6 @@ class DataStoreViewModel: ObservableObject {
     func completeReset() {
         let _ = self.dbManager.clearAllNotes()
         let _ = self.dbManager.clearUnusedPlaces()
-        Place.resetCounter(to: 0)
-        Note.resetCounter(to: 0)
+        self.refresh()
     }
 }

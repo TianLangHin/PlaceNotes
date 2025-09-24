@@ -58,6 +58,10 @@ struct LocationData: Codable {
         case longitude = "lon"
         case country = "country"
     }
+
+    func matchesWith(place: Place) -> Bool {
+        return self.name == place.name && self.latitude == place.latitude && self.longitude == place.longitude
+    }
 }
 
 enum LocationCategory: String, Hashable, CaseIterable {
