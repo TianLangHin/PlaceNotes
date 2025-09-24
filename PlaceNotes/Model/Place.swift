@@ -10,7 +10,6 @@ struct Place: Identifiable, IdGeneratable {
     let name: String
     let latitude: Double
     let longitude: Double
-    let postcode: String
     let categories: [String]
     var isFavourite: Bool
 

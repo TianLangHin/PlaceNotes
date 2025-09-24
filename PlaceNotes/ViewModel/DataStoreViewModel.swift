@@ -22,7 +22,7 @@ class DataStoreViewModel: ObservableObject {
         self.dbManager.insertPlace(place)
     }
 
-    func insertNote(_ note: Note) -> Bool {
+    func addNote(_ note: Note) -> Bool {
         self.dbManager.insertNote(note)
     }
 
@@ -50,5 +50,12 @@ class DataStoreViewModel: ObservableObject {
 
     func clearAllNotes() -> Bool {
         self.dbManager.clearAllNotes()
+    }
+
+    func completeReset() {
+        let _ = self.dbManager.clearAllNotes()
+        let _ = self.dbManager.clearUnusedPlaces()
+        Place.resetCounter(to: 0)
+        Note.resetCounter(to: 0)
     }
 }

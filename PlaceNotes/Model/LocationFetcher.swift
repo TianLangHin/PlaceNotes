@@ -75,7 +75,6 @@ enum LocationCategory: String, Hashable, CaseIterable {
     case government = "office.government"
     case lawyer = "office.lawyer"
     case telecommunication = "office.telecommunication"
-    case parking = "parking"
     case publicTransport = "public_transport"
     case service = "service"
     case sport = "sport"
@@ -112,8 +111,6 @@ enum LocationCategory: String, Hashable, CaseIterable {
             "Lawyer Offices"
         case .telecommunication:
             "Telecommunications"
-        case .parking:
-            "Parking"
         case .publicTransport:
             "Public Transport"
         case .service:

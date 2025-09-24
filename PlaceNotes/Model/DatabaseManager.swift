@@ -48,7 +48,6 @@ class DatabaseManager {
                 Name TEXT NOT NULL,
                 Latitude REAL NOT NULL,
                 Longitude REAL NOT NULL,
-                Postcode TEXT,
                 Categories TEXT,
                 Favourite BOOL NOT NULL
             );
@@ -106,9 +105,8 @@ class DatabaseManager {
         sqlite3_bind_text(insertStatement, 2, place.name, -1, nil)
         sqlite3_bind_double(insertStatement, 3, place.latitude)
         sqlite3_bind_double(insertStatement, 4, place.longitude)
-        sqlite3_bind_text(insertStatement, 5, place.postcode, -1, nil)
-        sqlite3_bind_text(insertStatement, 6, place.categories.joined(separator: ","), -1, nil)
-        sqlite3_bind_int(insertStatement, 7, place.isFavourite ? 1 : 0)
+        sqlite3_bind_text(insertStatement, 5, place.categories.joined(separator: ","), -1, nil)
+        sqlite3_bind_int(insertStatement, 6, place.isFavourite ? 1 : 0)
 
         guard sqlite3_step(insertStatement) == SQLITE_DONE else {
             return false
@@ -158,10 +156,9 @@ class DatabaseManager {
         sqlite3_bind_text(updateStatement, 1, place.name, -1, nil)
         sqlite3_bind_double(updateStatement, 2, place.latitude)
         sqlite3_bind_double(updateStatement, 3, place.longitude)
-        sqlite3_bind_text(updateStatement, 4, place.postcode, -1, nil)
-        sqlite3_bind_text(updateStatement, 5, place.categories.joined(separator: ","), -1, nil)
-        sqlite3_bind_int(updateStatement, 6, place.isFavourite ? 1 : 0)
-        sqlite3_bind_int64(updateStatement, 7, Int64(place.id))
+        sqlite3_bind_text(updateStatement, 4, place.categories.joined(separator: ","), -1, nil)
+        sqlite3_bind_int(updateStatement, 5, place.isFavourite ? 1 : 0)
+        sqlite3_bind_int64(updateStatement, 6, Int64(place.id))
 
         guard sqlite3_step(updateStatement) == SQLITE_DONE else {
             return false
@@ -260,15 +257,13 @@ class DatabaseManager {
             let name = String(cString: sqlite3_column_text(selectStatement, 1))
             let latitude = sqlite3_column_double(selectStatement, 2)
             let longitude = sqlite3_column_double(selectStatement, 3)
-            let postcode = String(cString: sqlite3_column_text(selectStatement, 4))
-            let categories = String(cString: sqlite3_column_text(selectStatement, 5)).split(separator: ",").map { String($0) }
-            let isFavourite = sqlite3_column_int(selectStatement, 6) != 0
+            let categories = String(cString: sqlite3_column_text(selectStatement, 4)).split(separator: ",").map { String($0) }
+            let isFavourite = sqlite3_column_int(selectStatement, 5) != 0
             let place = Place(
                 id: placeId,
                 name: name,
                 latitude: latitude,
                 longitude: longitude,
-                postcode: postcode,
                 categories: categories,
                 isFavourite: isFavourite)
             places.append(place)

@@ -16,10 +16,14 @@ struct MapExploreView: View {
     @State var lastQuery: [IdWrapper<CityData>] = []
     @State var isShowingSheet = false
 
+    @State var selectedPlace: PlaceAnnotation? = nil
+
+    @EnvironmentObject var dataStore: DataStoreViewModel
     @ObservedObject var mapViewModel = MapViewModel()
 
     var body: some View {
         VStack {
+            Text("\(isShowingSheet)")
             VStack {
                 HStack {
                     TextField("City name", text: $citySearch)
@@ -79,30 +83,45 @@ struct MapExploreView: View {
             .padding()
             .border(.black)
             ZStack {
-                Map(position: $mapViewModel.position) {
+                Map(position: $mapViewModel.position, selection: $selectedPlace) {
                     ForEach(mapViewModel.annotations) { annotation in
-                        switch annotation.mapPoint {
-                        case let .place(place):
-                            Marker(coordinate: annotation.coordinate) {
-                                VStack {
-                                    let img = place.isFavourite ? "heart" : "bookmark"
-                                    Image(systemName: "\(img).fill")
-                                    Text(annotation.mapPoint.name)
+                        Group {
+                            switch annotation.mapPoint {
+                            case let .place(place):
+                                Marker(coordinate: annotation.coordinate) {
+                                    Button {
+                                        isShowingSheet.toggle()
+                                    } label: {
+                                        VStack {
+                                            let img = place.isFavourite ? "heart" : "bookmark"
+                                            Image(systemName: "\(img).fill")
+                                            Text(annotation.mapPoint.name)
+                                        }
+                                    }
                                 }
-                            }
-                            .tint(.red)
-                        case .location:
-                            Marker(coordinate: annotation.coordinate) {
-                                VStack {
-                                    Image(systemName: "circle")
-                                    Text(annotation.mapPoint.name)
+                                .tint(.red)
+                            case .location:
+                                Marker(coordinate: annotation.coordinate) {
+                                    Button {
+                                        isShowingSheet.toggle()
+                                    } label: {
+                                        VStack {
+                                            Image(systemName: "circle")
+                                            Text(annotation.mapPoint.name)
+                                        }
+                                    }
                                 }
+                                .tint(.orange)
                             }
-                            .tint(.orange)
                         }
+                        .tag(annotation)
                     }
                 }
-                .onMapCameraChange(frequency: .continuous) { mapUpdateCtx in
+                .sheet(item: $selectedPlace) { selectedPlace in
+                    NewNoteView(attachedLocation: selectedPlace.mapPoint)
+                        .environmentObject(dataStore)
+                }
+                .onMapCameraChange(frequency: .onEnd) { mapUpdateCtx in
                     mapViewModel.refresh(context: mapUpdateCtx)
                 }
                 VStack {

@@ -16,6 +16,7 @@ struct ContentView: View {
     var body: some View {
         TabView {
             MapExploreView()
+                .environmentObject(dataStore)
                 .tabItem {
                     Image(systemName: "map")
                     Text("Map")
@@ -36,6 +37,11 @@ struct ContentView: View {
                     ForEach(dataStore.notes) { note in
                         Text("\(note)")
                     }
+                }
+                Button {
+                    dataStore.completeReset()
+                } label: {
+                    Text("Hard Reset")
                 }
             }
             .padding()
