@@ -46,8 +46,6 @@ struct LocationParams {
 
 struct LocationData: Codable {
     let name: String
-    let addressLine1: String
-    let addressLine2: String
     let categories: [String]
     let latitude: Double
     let longitude: Double
@@ -55,8 +53,6 @@ struct LocationData: Codable {
 
     enum CodingKeys: String, CodingKey {
         case name = "name"
-        case addressLine1 = "address_line1"
-        case addressLine2 = "address_line2"
         case categories = "categories"
         case latitude = "lat"
         case longitude = "lon"
@@ -64,9 +60,8 @@ struct LocationData: Codable {
     }
 }
 
-enum LocationCategory: String {
+enum LocationCategory: String, Hashable, CaseIterable {
     case accommodation = "accommodation"
-    case airport = "airport"
     case childcare = "childcare"
     case commercial = "commercial"
     case clothing = "commercial.clothing"
@@ -78,7 +73,6 @@ enum LocationCategory: String {
     case leisure = "leisure"
     case office = "office"
     case government = "office.government"
-    case insurance = "office.insurance"
     case lawyer = "office.lawyer"
     case telecommunication = "office.telecommunication"
     case parking = "parking"
@@ -87,6 +81,51 @@ enum LocationCategory: String {
     case sport = "sport"
     case tourism = "tourism"
     case religion = "religion"
+
+    func displayName() -> String {
+        switch self {
+        case .accommodation:
+            "Accommodation"
+        case .childcare:
+            "Childcare"
+        case .commercial:
+            "Commercial Buildings"
+        case .clothing:
+            "Clothing"
+        case .foodAndDrink:
+            "Food and Drink"
+        case .emergency:
+            "Emergency"
+        case .education:
+            "Education"
+        case .entertainment:
+            "Entertainment"
+        case .healthcare:
+            "Healthcare"
+        case .leisure:
+            "Leisure"
+        case .office:
+            "Offices"
+        case .government:
+            "Government Buildings"
+        case .lawyer:
+            "Lawyer Offices"
+        case .telecommunication:
+            "Telecommunications"
+        case .parking:
+            "Parking"
+        case .publicTransport:
+            "Public Transport"
+        case .service:
+            "Public Services"
+        case .sport:
+            "Sports Facilities"
+        case .tourism:
+            "Tourism"
+        case .religion:
+            "Religious"
+        }
+    }
 }
 
 enum LocationFilter {

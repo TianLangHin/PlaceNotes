@@ -16,6 +16,12 @@ class MapViewModel: ObservableObject {
 
     @Published var annotations: [PlaceAnnotation] = []
 
+    let cityFetcher = CityFetcher()
+    let locationFetcher = LocationFetcher()
+
+    let cityQueryLimit = 5
+    let locationQueryLimit = 20
+
     func setLocationTo(latitude: Double, longitude: Double) {
         let coordinate: CLLocationCoordinate2D = .init(latitude: latitude, longitude: longitude)
         self.position = .camera(MapCamera(centerCoordinate: coordinate, distance: height))
@@ -38,6 +44,19 @@ class MapViewModel: ObservableObject {
         self.longitude = context.region.center.longitude
         self.height = context.camera.distance
     }
+
+    func searchCity(_ queryString: String) async -> [CityData] {
+        return await cityFetcher.fetch(CityParams(city: queryString, queryLimit: self.cityQueryLimit)) ?? []
+    }
+
+    func searchLocations(_ category: LocationCategory) async {
+        let field = CircleQuery(lon: longitude, lat: latitude, radiusMetres: 5000)
+        let params = LocationParams(category: category, filter: .circle(field), queryLimit: self.locationQueryLimit)
+        let locations = await locationFetcher.fetch(params) ?? []
+        self.annotations = locations.map { location in
+            PlaceAnnotation(mapPoint: .location(location))
+        }
+    }
 }
 
 extension CLLocationCoordinate2D {
@@ -49,10 +68,29 @@ extension CLLocationCoordinate2D {
 class PlaceAnnotation: NSObject, MKAnnotation, Identifiable {
     let id = UUID()
     var coordinate: CLLocationCoordinate2D
-    let place: Place
+    let mapPoint: MapPoint
 
-    init(place: Place) {
-        self.place = place
-        self.coordinate = .init(latitude: place.latitude, longitude: place.longitude)
+    init(mapPoint: MapPoint) {
+        self.mapPoint = mapPoint
+        switch mapPoint {
+        case let .place(placeData):
+            self.coordinate = .init(latitude: placeData.latitude, longitude: placeData.longitude)
+        case let .location(locationData):
+            self.coordinate = .init(latitude: locationData.latitude, longitude: locationData.longitude)
+        }
+    }
+}
+
+enum MapPoint {
+    case place(Place)
+    case location(LocationData)
+
+    var name: String {
+        switch self {
+        case let .place(placeData):
+            return placeData.name
+        case let .location(locationData):
+            return locationData.name
+        }
     }
 }
