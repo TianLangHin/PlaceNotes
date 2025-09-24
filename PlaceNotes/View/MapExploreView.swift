@@ -82,7 +82,7 @@ struct MapExploreView: View {
             .border(.black)
             ZStack {
                 Map(position: $mapViewModel.position, selection: $selectedPlace) {
-                    ForEach(mapViewModel.annotations) { annotation in
+                    ForEach(mapViewModel.classifiedLocations(saved: dataStore.places)) { annotation in
                         Group {
                             switch annotation.mapPoint {
                             case let .place(place):
@@ -153,4 +153,5 @@ struct MapExploreView: View {
 
 #Preview {
     MapExploreView()
+        .environmentObject(DataStoreViewModel())
 }

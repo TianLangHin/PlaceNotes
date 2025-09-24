@@ -17,6 +17,8 @@ struct NewNoteView: View {
     @State var descriptionText = ""
     @State var date = Date()
 
+    @State var isFavourite = false
+
     var body: some View {
         VStack {
             HStack {
@@ -26,11 +28,30 @@ struct NewNoteView: View {
                         .fontWeight(.bold)
                         .font(.title)
                         .padding()
-                    switch attachedLocation {
-                    case .place(let place):
-                        Text("For: \(place.name)")
-                    case .location(let locationData):
-                        Text("For: \(locationData.name)")
+                    HStack {
+                        Spacer()
+                        switch attachedLocation {
+                        case .place(let place):
+                            Text("For: \(place.name)")
+                        case .location(let locationData):
+                            Text("For: \(locationData.name)")
+                        }
+                        Spacer()
+                        if case .place(let place) = attachedLocation {
+                            Button {
+                                isFavourite.toggle()
+                                let toggledPlace = Place(
+                                    id: place.id,
+                                    name: place.name,
+                                    latitude: place.latitude,
+                                    longitude: place.longitude,
+                                    categories: place.categories,
+                                    isFavourite: !place.isFavourite)
+                                let _ = dataStore.updatePlace(toggledPlace)
+                            } label: {
+                                Image(systemName: "heart" + (isFavourite ? ".fill" : ""))
+                            }
+                        }
                     }
                 }
                 Spacer()
@@ -72,6 +93,11 @@ struct NewNoteView: View {
             }
             .padding()
             Spacer()
+        }
+        .onAppear {
+            if case .place(let place) = attachedLocation {
+                isFavourite = place.isFavourite
+            }
         }
     }
 

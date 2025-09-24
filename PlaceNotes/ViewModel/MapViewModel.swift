@@ -57,6 +57,27 @@ class MapViewModel: ObservableObject {
             PlaceAnnotation(mapPoint: .location(location))
         }
     }
+
+    func notSavedLocations(saved places: [Place]) -> [PlaceAnnotation] {
+        return self.annotations.filter { location in
+            switch location.mapPoint {
+                case let .location(locationData):
+                    return places.allSatisfy { place in
+                        !locationData.matchesWith(place: place)
+                    }
+                case .place:
+                    return false
+            }
+        }
+    }
+
+    func classifiedLocations(saved places: [Place]) -> [PlaceAnnotation] {
+        let locations = self.notSavedLocations(saved: places)
+        let places = places.map { place in
+            PlaceAnnotation(mapPoint: .place(place))
+        }
+        return locations + places
+    }
 }
 
 extension CLLocationCoordinate2D {

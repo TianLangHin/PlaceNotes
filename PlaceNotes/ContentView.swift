@@ -29,13 +29,20 @@ struct ContentView: View {
                 Text("Places")
                 List {
                     ForEach(dataStore.places) { place in
-                        Text("\(place.name)")
+                        Text("\(place.id): \(place.name) (\(place.isFavourite))")
                     }
                 }
                 Text("Notes")
                 List {
                     ForEach(dataStore.notes) { note in
-                        Text("\(note.title) \(note.description)")
+                        VStack {
+                            Text("\(note.title) \(note.description)")
+                            HStack {
+                                Spacer()
+                                Text("\(note.placeID)")
+                                Spacer()
+                            }
+                        }
                     }
                 }
                 Button {
