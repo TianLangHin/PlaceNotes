@@ -11,7 +11,6 @@ import SwiftUI
 struct MapExploreView: View {
     @State var citySearch = ""
     @State var resultsText = "Start searching to find cities!"
-    @State var locationSelection: LocationCategory? = nil
     @State var lastQuery: [IdWrapper<CityData>] = []
 
     @State var selectedPlace: PlaceAnnotation? = nil
@@ -19,10 +18,20 @@ struct MapExploreView: View {
     @EnvironmentObject var dataStore: DataStoreViewModel
     @ObservedObject var mapViewModel = MapViewModel()
 
+    @State var isAlerting = false
+
     var body: some View {
         VStack {
-            citySearchBar()
-            placeSearchBar()
+            HStack {
+                Spacer()
+                Text("Notes Map")
+                    .font(.title)
+                Spacer()
+            }
+            VStack(spacing: 0) {
+                citySearchBar()
+                placeSearchBar()
+            }
             ZStack {
                 Map(position: $mapViewModel.position, selection: $selectedPlace) {
                     ForEach(mapViewModel.classifiedLocations(saved: dataStore.places)) { annotation in
@@ -50,9 +59,7 @@ struct MapExploreView: View {
                         .tag(annotation)
                     }
                 }
-                .sheet(item: $selectedPlace, onDismiss: {
-                    locationSelection = nil
-                }) { selectedPlace in
+                .sheet(item: $selectedPlace) { selectedPlace in
                     switch selectedPlace.mapPoint {
                     case let .place(knownPlace):
                         KnownPlaceView(place: knownPlace)
@@ -96,8 +103,10 @@ struct MapExploreView: View {
                     }
                     .padding()
                 }
-                .padding()
             }
+        }
+        .alert("No results nearby for this category!", isPresented: $isAlerting) {
+            Button("OK", role: .cancel) {}
         }
     }
 
@@ -118,7 +127,7 @@ struct MapExploreView: View {
                 }
                 .buttonStyle(.borderedProminent)
             }
-            Menu(resultsText) {
+            Menu {
                 ForEach(lastQuery) { cityData in
                     let city = cityData.data
                     Button {
@@ -127,42 +136,55 @@ struct MapExploreView: View {
                         Text("\(city.city), \(city.country)\n (\(city.latitude), \(city.longitude))")
                     }
                 }
+            } label: {
+                HStack {
+                    Text(resultsText)
+                    Image(systemName: "chevron.up")
+                }
             }
         }
         .padding()
-        .border(.black)
+        .border(.black, width: 2)
     }
 
     func placeSearchBar() -> some View {
         HStack {
-            // Toggle here
+            Menu("Places") {
+                ForEach(LocationCategory.allCases, id: \.self) { category in
+                    Button {
+                        mapViewModel.locationSelection = category
+                    } label: {
+                        Text("\(category.displayName())")
+                    }
+                }
+            }
+            Spacer()
+            if let category = mapViewModel.locationSelection {
+                Text(category.displayName())
+            } else {
+                HStack {
+                    Image(systemName: "chevron.left")
+                    Text("Select a search category!")
+                        .multilineTextAlignment(.center)
+                }
+            }
+            Spacer()
             Button {
                 Task {
-                    if let category = locationSelection {
-                        await mapViewModel.searchLocations(category)
+                    if let category = mapViewModel.locationSelection {
+                        let noResults = await mapViewModel.searchLocations(category)
+                        if noResults {
+                            isAlerting = true
+                        }
                     }
                 }
             } label: {
                 Text("Display")
             }
             .buttonStyle(.borderedProminent)
-            Spacer()
-            if let category = locationSelection {
-                Text("\(category.displayName())")
-            }
-            Spacer()
-            Menu("Places") {
-                ForEach(LocationCategory.allCases, id: \.self) { category in
-                    Button {
-                        locationSelection = category
-                    } label: {
-                        Text("\(category.displayName())")
-                    }
-                }
-            }
         }
         .padding()
-        .border(.black)
+        .border(.black, width: 2)
     }
 }
 

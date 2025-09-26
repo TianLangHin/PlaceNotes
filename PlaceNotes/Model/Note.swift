@@ -23,6 +23,6 @@ struct Note: Identifiable, IdGeneratable {
     }
 
     static func resetCounter(to maximum: Int) {
-        nextId = min(nextId, maximum + 1)
+        nextId = maximum + 1
     }
 }

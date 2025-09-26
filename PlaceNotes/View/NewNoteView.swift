@@ -59,7 +59,6 @@ struct NewNoteView: View {
                     let trimmedDesc = descriptionText.trimmingCharacters(in: .whitespaces)
                     if trimmedTitle != "" && trimmedDesc != "" {
                         saveNote()
-                        dismiss()
                     }
                 } label: {
                     Text("Save Note")
@@ -70,7 +69,9 @@ struct NewNoteView: View {
             Spacer()
         }
         .alert(alertText, isPresented: $isAlerting) {
-            Button("OK", role: .cancel) {}
+            Button("OK", role: .cancel) {
+                dismiss()
+            }
         }
     }
 
@@ -98,7 +99,7 @@ struct NewNoteView: View {
                 isFavourite: false)
             let addPlaceSuccess = dataStore.addPlace(newPlace)
             if !addPlaceSuccess {
-                alertText = "Sorry, this note could not be added. Please try again later!"
+                alertText = "Sorry, this location could not be added. Please try again later!"
                 isAlerting = true
             }
             let newNote = Note(
@@ -111,6 +112,9 @@ struct NewNoteView: View {
             if !addNoteSuccess {
                 alertText = "Sorry, this note could not be added. Please try again later!"
                 isAlerting = true
+            }
+            if !isAlerting {
+                dismiss()
             }
         }
     }
