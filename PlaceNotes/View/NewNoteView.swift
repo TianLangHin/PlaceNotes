@@ -15,7 +15,7 @@ struct NewNoteView: View {
 
     @State var titleText = ""
     @State var descriptionText = ""
-    @State var date = Date()
+    @State var date = Date.now
 
     @State var isAlerting = false
     @State var alertText = ""
@@ -113,9 +113,9 @@ struct NewNoteView: View {
                 alertText = "Sorry, this note could not be added. Please try again later!"
                 isAlerting = true
             }
-            if !isAlerting {
-                dismiss()
-            }
+        }
+        if !isAlerting {
+            dismiss()
         }
     }
 }

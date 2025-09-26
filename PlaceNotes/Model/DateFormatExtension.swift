@@ -12,7 +12,7 @@ extension DateFormatter {
     // that formats dates to the ISO 8601 format.
     static func iso() -> DateFormatter {
         let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-ddTHH:mm:ssZ"
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
         return dateFormatter
     }
 }

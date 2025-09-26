@@ -24,7 +24,7 @@ struct KnownPlaceView: View {
     @State var alertText = ""
 
     var body: some View {
-        VStack {
+        VStack(alignment: .center) {
             HStack {
                 Text(place.name)
                     .fontWeight(.bold)
@@ -43,7 +43,7 @@ struct KnownPlaceView: View {
                     Text("No existing notes!")
                 } else {
                     ForEach(relevantNotes) { note in
-                        NoteBriefView(note: note)
+                        NoteBriefView(note: note, showPlace: false)
                             .environmentObject(dataStore)
                     }
                 }

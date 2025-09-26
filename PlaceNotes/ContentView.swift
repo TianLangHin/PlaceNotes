@@ -12,6 +12,12 @@ struct ContentView: View {
 
     var body: some View {
         TabView {
+            RankedNotesView()
+                .environmentObject(dataStore)
+                .tabItem {
+                    Image(systemName: "bell.fill")
+                    Text("Notes")
+                }
             MapExploreView()
                 .environmentObject(dataStore)
                 .tabItem {
@@ -22,7 +28,7 @@ struct ContentView: View {
                 .environmentObject(dataStore)
                 .tabItem {
                     Image(systemName: "clock.fill")
-                    Text("Notes")
+                    Text("Debug")
                 }
         }
     }

@@ -26,6 +26,7 @@ struct MapExploreView: View {
                 Spacer()
                 Text("Notes Map")
                     .font(.title)
+                    .fontWeight(.bold)
                 Spacer()
             }
             VStack(spacing: 0) {
