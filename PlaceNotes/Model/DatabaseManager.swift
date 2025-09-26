@@ -217,9 +217,10 @@ class DatabaseManager {
     }
 
     func clearUnusedPlaces() -> Bool {
+        print("call")
         let deleteString = """
             DELETE FROM \(placesTable)
-            WHERE PlaceID NOT IN (SELECT DISTINCT PlaceID FROM \(notesTable));
+            WHERE PlaceID NOT IN (SELECT DISTINCT PlaceID FROM \(notesTable)) AND Favourite = FALSE;
         """
         var deleteStatement: OpaquePointer? = nil
 

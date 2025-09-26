@@ -38,6 +38,12 @@ struct RankedNotesView: View {
                             NoteBriefView(note: note)
                                 .environmentObject(dataStore)
                         }
+                        .onDelete { indexSet in
+                            for index in indexSet {
+                                let _ = dataStore.deleteNote(by: rankedNotes[index].id)
+                            }
+                            let _ = dataStore.clearUnusedPlaces()
+                        }
                     } header: {
                         HStack {
                             Spacer()
@@ -49,6 +55,12 @@ struct RankedNotesView: View {
                         ForEach(rankedNotes.filter { $0.date >= Date() }) { note in
                             NoteBriefView(note: note)
                                 .environmentObject(dataStore)
+                        }
+                        .onDelete { indexSet in
+                            for index in indexSet {
+                                let _ = dataStore.deleteNote(by: rankedNotes[index].id)
+                            }
+                            let _ = dataStore.clearUnusedPlaces()
                         }
                     } header: {
                         HStack {

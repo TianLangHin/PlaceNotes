@@ -88,6 +88,9 @@ struct KnownPlaceView: View {
                 alertText = "Could not toggle the favourite status! Please try again later."
                 isAlerting = true
             }
+            if !isFavourite && dataStore.notes.allSatisfy({ $0.placeID != place.id }) {
+                dismiss()
+            }
         } label: {
             Image(systemName: "heart" + (isFavourite ? ".fill" : ""))
         }
