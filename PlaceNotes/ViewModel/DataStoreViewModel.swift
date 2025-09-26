@@ -72,4 +72,8 @@ class DataStoreViewModel: ObservableObject {
         let _ = self.dbManager.clearUnusedPlaces()
         self.refresh()
     }
+
+    func getPlace(by id: Int) -> Place? {
+        return self.places.first(where: { $0.id == id })
+    }
 }

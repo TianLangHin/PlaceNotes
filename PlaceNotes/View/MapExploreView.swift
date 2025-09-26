@@ -9,7 +9,6 @@ import MapKit
 import SwiftUI
 
 struct MapExploreView: View {
-
     @State var citySearch = ""
     @State var resultsText = "Start searching to find cities!"
     @State var locationSelection: LocationCategory? = nil
@@ -22,64 +21,8 @@ struct MapExploreView: View {
 
     var body: some View {
         VStack {
-            VStack {
-                HStack {
-                    TextField("City name", text: $citySearch)
-                    Spacer()
-                    Button {
-                        Task {
-                            let cities = await mapViewModel.searchCity(citySearch)
-                            lastQuery = cities.map { IdWrapper(data: $0) }
-                            citySearch = ""
-                            resultsText = "Found cities: \(lastQuery.count)"
-                        }
-                    } label: {
-                        Text("Search")
-                    }
-                    .buttonStyle(.borderedProminent)
-                }
-                Menu(resultsText) {
-                    ForEach(lastQuery) { cityData in
-                        let city = cityData.data
-                        Button {
-                            mapViewModel.setLocationTo(latitude: city.latitude, longitude: city.longitude)
-                        } label: {
-                            Text("\(city.city), \(city.country)\n (\(city.latitude), \(city.longitude))")
-                        }
-                    }
-                }
-            }
-            .padding()
-            .border(.black)
-            HStack {
-                // Toggle here
-                Button {
-                    Task {
-                        if let category = locationSelection {
-                            await mapViewModel.searchLocations(category)
-                        }
-                    }
-                } label: {
-                    Text("Display")
-                }
-                .buttonStyle(.borderedProminent)
-                Spacer()
-                if let category = locationSelection {
-                    Text("\(category.displayName())")
-                }
-                Spacer()
-                Menu("Places") {
-                    ForEach(LocationCategory.allCases, id: \.self) { category in
-                        Button {
-                            locationSelection = category
-                        } label: {
-                            Text("\(category.displayName())")
-                        }
-                    }
-                }
-            }
-            .padding()
-            .border(.black)
+            citySearchBar()
+            placeSearchBar()
             ZStack {
                 Map(position: $mapViewModel.position, selection: $selectedPlace) {
                     ForEach(mapViewModel.classifiedLocations(saved: dataStore.places)) { annotation in
@@ -107,9 +50,17 @@ struct MapExploreView: View {
                         .tag(annotation)
                     }
                 }
-                .sheet(item: $selectedPlace) { selectedPlace in
-                    NewNoteView(attachedLocation: selectedPlace.mapPoint)
-                        .environmentObject(dataStore)
+                .sheet(item: $selectedPlace, onDismiss: {
+                    locationSelection = nil
+                }) { selectedPlace in
+                    switch selectedPlace.mapPoint {
+                    case let .place(knownPlace):
+                        KnownPlaceView(place: knownPlace)
+                            .environmentObject(dataStore)
+                    case let .location(newLocation):
+                        NewNoteView(attachedLocation: .location(newLocation))
+                            .environmentObject(dataStore)
+                    }
                 }
                 .onMapCameraChange(frequency: .onEnd) { mapUpdateCtx in
                     mapViewModel.refresh(context: mapUpdateCtx)
@@ -148,6 +99,70 @@ struct MapExploreView: View {
                 .padding()
             }
         }
+    }
+
+    func citySearchBar() -> some View {
+        VStack {
+            HStack {
+                TextField("City name", text: $citySearch)
+                Spacer()
+                Button {
+                    Task {
+                        let cities = await mapViewModel.searchCity(citySearch)
+                        lastQuery = cities.map { IdWrapper(data: $0) }
+                        citySearch = ""
+                        resultsText = "Found cities: \(lastQuery.count)"
+                    }
+                } label: {
+                    Text("Search")
+                }
+                .buttonStyle(.borderedProminent)
+            }
+            Menu(resultsText) {
+                ForEach(lastQuery) { cityData in
+                    let city = cityData.data
+                    Button {
+                        mapViewModel.setLocationTo(latitude: city.latitude, longitude: city.longitude)
+                    } label: {
+                        Text("\(city.city), \(city.country)\n (\(city.latitude), \(city.longitude))")
+                    }
+                }
+            }
+        }
+        .padding()
+        .border(.black)
+    }
+
+    func placeSearchBar() -> some View {
+        HStack {
+            // Toggle here
+            Button {
+                Task {
+                    if let category = locationSelection {
+                        await mapViewModel.searchLocations(category)
+                    }
+                }
+            } label: {
+                Text("Display")
+            }
+            .buttonStyle(.borderedProminent)
+            Spacer()
+            if let category = locationSelection {
+                Text("\(category.displayName())")
+            }
+            Spacer()
+            Menu("Places") {
+                ForEach(LocationCategory.allCases, id: \.self) { category in
+                    Button {
+                        locationSelection = category
+                    } label: {
+                        Text("\(category.displayName())")
+                    }
+                }
+            }
+        }
+        .padding()
+        .border(.black)
     }
 }
 

@@ -10,7 +10,7 @@ import SQLite3
 
 class DatabaseManager {
     var dbPointer: OpaquePointer?
-    let dbName = "PlaceNotes.sqlite"
+    let dbName: String
     let placesTable = "Places"
     let notesTable = "Notes"
     let dateFormatter = DateFormatter.iso()
@@ -19,8 +19,9 @@ class DatabaseManager {
 
     var success: Bool
 
-    init() {
+    init(dbName: String = "PlaceNotes.sqlite") {
         // First, locate the SQLite database file.
+        self.dbName = dbName
         let dbFileURL = try? FileManager.default.url(
             for: .documentDirectory,
             in: .userDomainMask,

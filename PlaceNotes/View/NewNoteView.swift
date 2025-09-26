@@ -17,43 +17,17 @@ struct NewNoteView: View {
     @State var descriptionText = ""
     @State var date = Date()
 
-    @State var isFavourite = false
+    @State var isAlerting = false
+    @State var alertText = ""
 
     var body: some View {
         VStack {
             HStack {
                 Spacer()
-                VStack {
-                    Text("New Note")
-                        .fontWeight(.bold)
-                        .font(.title)
-                        .padding()
-                    HStack {
-                        Spacer()
-                        switch attachedLocation {
-                        case .place(let place):
-                            Text("For: \(place.name)")
-                        case .location(let locationData):
-                            Text("For: \(locationData.name)")
-                        }
-                        Spacer()
-                        if case .place(let place) = attachedLocation {
-                            Button {
-                                isFavourite.toggle()
-                                let toggledPlace = Place(
-                                    id: place.id,
-                                    name: place.name,
-                                    latitude: place.latitude,
-                                    longitude: place.longitude,
-                                    categories: place.categories,
-                                    isFavourite: !place.isFavourite)
-                                let _ = dataStore.updatePlace(toggledPlace)
-                            } label: {
-                                Image(systemName: "heart" + (isFavourite ? ".fill" : ""))
-                            }
-                        }
-                    }
-                }
+                Text("New Note for \(attachedLocation.name)")
+                    .fontWeight(.bold)
+                    .font(.title)
+                    .padding()
                 Spacer()
             }
             HStack {
@@ -90,47 +64,64 @@ struct NewNoteView: View {
                 } label: {
                     Text("Save Note")
                 }
+                Spacer()
             }
             .padding()
             Spacer()
         }
-        .onAppear {
-            if case .place(let place) = attachedLocation {
-                isFavourite = place.isFavourite
-            }
+        .alert(alertText, isPresented: $isAlerting) {
+            Button("OK", role: .cancel) {}
         }
     }
 
     func saveNote() {
         switch attachedLocation {
-        case let .place(place):
+        case let .place(knownPlace):
             let newNote = Note(
                 id: Note.uniqueId(),
                 title: titleText,
                 description: descriptionText,
                 date: date,
-                placeID: place.id)
-            let _ = dataStore.addNote(newNote)
-        case let .location(locationData):
+                placeID: knownPlace.id)
+            let addNoteSuccess = dataStore.addNote(newNote)
+            if !addNoteSuccess {
+                alertText = "Sorry, this note could not be added. Please try again later!"
+                isAlerting = true
+            }
+        case let .location(newLocation):
             let newPlace = Place(
                 id: Place.uniqueId(),
-                name: locationData.name,
-                latitude: locationData.latitude,
-                longitude: locationData.longitude,
-                categories: locationData.categories,
+                name: newLocation.name,
+                latitude: newLocation.latitude,
+                longitude: newLocation.longitude,
+                categories: newLocation.categories,
                 isFavourite: false)
-            let _ = dataStore.addPlace(newPlace)
+            let addPlaceSuccess = dataStore.addPlace(newPlace)
+            if !addPlaceSuccess {
+                alertText = "Sorry, this note could not be added. Please try again later!"
+                isAlerting = true
+            }
             let newNote = Note(
                 id: Note.uniqueId(),
                 title: titleText,
                 description: descriptionText,
                 date: date,
                 placeID: newPlace.id)
-            let _ = dataStore.addNote(newNote)
+            let addNoteSuccess = dataStore.addNote(newNote)
+            if !addNoteSuccess {
+                alertText = "Sorry, this note could not be added. Please try again later!"
+                isAlerting = true
+            }
         }
     }
 }
 
 #Preview {
-    NewNoteView(attachedLocation: .location(LocationData(name: "Place Name", categories: [], latitude: 100, longitude: -100, country: "Australia")))
+    NewNoteView(
+        attachedLocation: .location(LocationData(
+            name: "Place Name",
+            categories: [],
+            latitude: 100,
+            longitude: -100,
+            country: "Australia")))
 }

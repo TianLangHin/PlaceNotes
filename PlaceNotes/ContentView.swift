@@ -9,9 +9,6 @@ import SwiftUI
 
 struct ContentView: View {
     @ObservedObject var dataStore = DataStoreViewModel()
-    @State var placeTf = ""
-    @State var noteTf = ""
-    @State var placeId: Int? = nil
 
     var body: some View {
         TabView {
@@ -21,41 +18,12 @@ struct ContentView: View {
                     Image(systemName: "map")
                     Text("Map")
                 }
-
-            VStack {
-                Text("\(dataStore.dbManager.success)")
-                Text("Selected PlaceID: \(String(describing: placeId))")
-                Spacer()
-                Text("Places")
-                List {
-                    ForEach(dataStore.places) { place in
-                        Text("\(place.id): \(place.name) (\(place.isFavourite))")
-                    }
+            AllNotesView()
+                .environmentObject(dataStore)
+                .tabItem {
+                    Image(systemName: "clock.fill")
+                    Text("Notes")
                 }
-                Text("Notes")
-                List {
-                    ForEach(dataStore.notes) { note in
-                        VStack {
-                            Text("\(note.title) \(note.description)")
-                            HStack {
-                                Spacer()
-                                Text("\(note.placeID)")
-                                Spacer()
-                            }
-                        }
-                    }
-                }
-                Button {
-                    dataStore.completeReset()
-                } label: {
-                    Text("Hard Reset")
-                }
-            }
-            .padding()
-            .tabItem {
-                Image(systemName: "clock.fill")
-                Text("DB Manager")
-            }
         }
     }
 }
