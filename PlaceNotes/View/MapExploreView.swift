@@ -16,7 +16,7 @@ struct MapExploreView: View {
     @State var selectedPlace: PlaceAnnotation? = nil
 
     @EnvironmentObject var dataStore: DataStoreViewModel
-    @ObservedObject var mapViewModel = MapViewModel()
+    @EnvironmentObject var mapViewModel: MapViewModel
 
     @State var isAlerting = false
 
@@ -134,7 +134,12 @@ struct MapExploreView: View {
                     Button {
                         mapViewModel.setLocationTo(latitude: city.latitude, longitude: city.longitude)
                     } label: {
-                        Text("\(city.city), \(city.country)\n (\(city.latitude), \(city.longitude))")
+                        let cityCountryName = "\(city.city), \(city.country)"
+                        let latValue = city.latitude.formatted(.number.precision(.fractionLength(4)))
+                        let lonValue = city.longitude.formatted(.number.precision(.fractionLength(4)))
+                        let latitude = "\(latValue)\(city.latitude >= 0 ? "°N" : "°S")"
+                        let longitude = "\(lonValue)\(city.longitude >= 0 ? "°E" : "°W")"
+                        Text("\(cityCountryName)\n(\(latitude), \(longitude))")
                     }
                 }
             } label: {
@@ -143,46 +148,63 @@ struct MapExploreView: View {
                     Image(systemName: "chevron.up")
                 }
             }
+            .frame(maxWidth: .infinity)
         }
         .padding()
         .border(.black, width: 2)
     }
 
     func placeSearchBar() -> some View {
-        HStack {
-            Menu("Places") {
-                ForEach(LocationCategory.allCases, id: \.self) { category in
-                    Button {
-                        mapViewModel.locationSelection = category
-                    } label: {
-                        Text("\(category.displayName())")
-                    }
-                }
-            }
-            Spacer()
-            if let category = mapViewModel.locationSelection {
-                Text(category.displayName())
-            } else {
-                HStack {
-                    Image(systemName: "chevron.left")
-                    Text("Select a search category!")
-                        .multilineTextAlignment(.center)
-                }
-            }
-            Spacer()
-            Button {
-                Task {
-                    if let category = mapViewModel.locationSelection {
-                        let noResults = await mapViewModel.searchLocations(category)
-                        if noResults {
-                            isAlerting = true
+        VStack {
+            HStack {
+                Menu("Places") {
+                    ForEach(LocationCategory.allCases, id: \.self) { category in
+                        Button {
+                            mapViewModel.locationSelection = category
+                        } label: {
+                            Text("\(category.displayName())")
                         }
                     }
                 }
-            } label: {
-                Text("Display")
+                Spacer()
+                if let category = mapViewModel.locationSelection {
+                    HStack {
+                        Spacer()
+                        Text(category.displayName())
+                        Image(systemName: "chevron.right")
+                        Spacer()
+                    }
+                } else {
+                    HStack {
+                        Image(systemName: "chevron.left")
+                        Text("Select a search category!")
+                            .multilineTextAlignment(.center)
+                    }
+                }
+                Spacer()
+                Button {
+                    Task {
+                        if let category = mapViewModel.locationSelection {
+                            let noResults = await mapViewModel.searchLocations(category)
+                            if noResults {
+                                isAlerting = true
+                            }
+                        }
+                    }
+                } label: {
+                    Text("Display")
+                }
+                .buttonStyle(.borderedProminent)
             }
-            .buttonStyle(.borderedProminent)
+            HStack {
+                Spacer()
+                Button {
+                    mapViewModel.annotations = []
+                } label: {
+                    Text("Clear Location Markers")
+                }
+                Spacer()
+            }
         }
         .padding()
         .border(.black, width: 2)
@@ -192,4 +214,5 @@ struct MapExploreView: View {
 #Preview {
     MapExploreView()
         .environmentObject(DataStoreViewModel())
+        .environmentObject(MapViewModel())
 }

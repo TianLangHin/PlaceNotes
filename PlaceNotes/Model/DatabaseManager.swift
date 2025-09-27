@@ -233,6 +233,23 @@ class DatabaseManager {
         return true
     }
 
+    func clearAllPlaces() -> Bool {
+        let deleteString = """
+            DELETE FROM \(placesTable)
+            WHERE PlaceID NOT IN (SELECT DISTINCT PlaceID FROM \(notesTable));
+        """
+        var deleteStatement: OpaquePointer? = nil
+
+        guard sqlite3_prepare_v2(dbPointer, deleteString, -1, &deleteStatement, nil) == SQLITE_OK else {
+            return false
+        }
+        guard sqlite3_step(deleteStatement) == SQLITE_DONE else {
+            return false
+        }
+        sqlite3_finalize(deleteStatement)
+        return true
+    }
+
     func clearAllNotes() -> Bool {
         let deleteString = "DELETE FROM \(notesTable);"
         var deleteStatement: OpaquePointer? = nil

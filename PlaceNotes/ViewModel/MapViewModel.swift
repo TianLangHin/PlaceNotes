@@ -20,8 +20,8 @@ class MapViewModel: ObservableObject {
     let cityFetcher = CityFetcher()
     let locationFetcher = LocationFetcher()
 
-    let cityQueryLimit = 5
-    let locationQueryLimit = 40
+    @Published var cityQueryLimit: Double = 5
+    @Published var locationQueryLimit: Double = 40
 
     func setLocationTo(latitude: Double, longitude: Double) {
         let coordinate: CLLocationCoordinate2D = .init(latitude: latitude, longitude: longitude)
@@ -47,12 +47,12 @@ class MapViewModel: ObservableObject {
     }
 
     func searchCity(_ queryString: String) async -> [CityData] {
-        return await cityFetcher.fetch(CityParams(city: queryString, queryLimit: self.cityQueryLimit)) ?? []
+        return await cityFetcher.fetch(CityParams(city: queryString, queryLimit: Int(self.cityQueryLimit))) ?? []
     }
 
     func searchLocations(_ category: LocationCategory) async -> Bool {
         let field = CircleQuery(lon: longitude, lat: latitude, radiusMetres: 5000)
-        let params = LocationParams(category: category, filter: .circle(field), queryLimit: self.locationQueryLimit)
+        let params = LocationParams(category: category, filter: .circle(field), queryLimit: Int(self.locationQueryLimit))
         let locations = await locationFetcher.fetch(params) ?? []
         self.annotations = locations.map { location in
             PlaceAnnotation(mapPoint: .location(location))

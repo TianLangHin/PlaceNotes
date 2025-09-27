@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ContentView: View {
     @ObservedObject var dataStore = DataStoreViewModel()
+    @ObservedObject var mapViewModel = MapViewModel()
 
     var body: some View {
         TabView {
@@ -20,6 +21,7 @@ struct ContentView: View {
                 }
             MapExploreView()
                 .environmentObject(dataStore)
+                .environmentObject(mapViewModel)
                 .tabItem {
                     Image(systemName: "map")
                     Text("Map")
@@ -30,11 +32,12 @@ struct ContentView: View {
                     Image(systemName: "magnifyingglass")
                     Text("Search Notes")
                 }
-            AllNotesView()
+            SettingView()
                 .environmentObject(dataStore)
+                .environmentObject(mapViewModel)
                 .tabItem {
-                    Image(systemName: "clock.fill")
-                    Text("Debug")
+                    Image(systemName: "info.circle")
+                    Text("App Info")
                 }
         }
     }

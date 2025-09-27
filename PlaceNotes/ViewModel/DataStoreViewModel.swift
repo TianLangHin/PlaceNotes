@@ -75,7 +75,7 @@ class DataStoreViewModel: ObservableObject {
 
     func completeReset() {
         let _ = self.dbManager.clearAllNotes()
-        let _ = self.dbManager.clearUnusedPlaces()
+        let _ = self.dbManager.clearAllPlaces()
         self.refresh()
     }
 
