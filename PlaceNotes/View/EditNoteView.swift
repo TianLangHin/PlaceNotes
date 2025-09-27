@@ -1,31 +1,31 @@
 //
-//  NewNoteView.swift
+//  EditNoteView.swift
 //  PlaceNotes
 //
-//  Created by Tian Lang Hin on 24/9/2025.
+//  Created by Tian Lang Hin on 27/9/2025.
 //
 
 import SwiftUI
 
-struct NewNoteView: View {
+struct EditNoteView: View {
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var dataStore: DataStoreViewModel
     @State var converter = CategoriesViewModel()
 
-    @State var attachedLocation: MapPoint
+    @State var note: Note
+    @State var attachedPlace: Place?
 
     @State var titleText = ""
     @State var descriptionText = ""
-    @State var date = Date.now
+    @State var date = Date()
 
     @State var isAlerting = false
-    @State var alertText = ""
 
     var body: some View {
         VStack {
             HStack {
                 Spacer()
-                Text("New Note for \(attachedLocation.name)")
+                Text("Editing Note for \(attachedPlace?.name ?? "")")
                     .fontWeight(.bold)
                     .font(.title)
                     .padding()
@@ -39,7 +39,7 @@ struct NewNoteView: View {
             }
             ScrollView(.horizontal, showsIndicators: true) {
                 HStack {
-                    let categories = converter.categoryNames(attachedLocation.categories)
+                    let categories = converter.categoryNames(attachedPlace?.categories ?? [])
                     ForEach(categories, id: \.self) { category in
                         Text(category)
                             .padding()
@@ -76,7 +76,7 @@ struct NewNoteView: View {
                     let trimmedTitle = titleText.trimmingCharacters(in: .whitespaces)
                     let trimmedDesc = descriptionText.trimmingCharacters(in: .whitespaces)
                     if trimmedTitle != "" && trimmedDesc != "" {
-                        saveNote()
+                        saveChanges()
                     }
                 } label: {
                     Text("Save Note")
@@ -86,64 +86,25 @@ struct NewNoteView: View {
             .padding()
             Spacer()
         }
-        .alert(alertText, isPresented: $isAlerting) {
+        .onAppear {
+            titleText = note.title
+            descriptionText = note.description
+            date = note.date
+        }
+        .alert("Sorry, note could not be edited! Please try again later.", isPresented: $isAlerting) {
             Button("OK", role: .cancel) {
                 dismiss()
             }
         }
     }
 
-    func saveNote() {
-        switch attachedLocation {
-        case let .place(knownPlace):
-            let newNote = Note(
-                id: Note.uniqueId(),
-                title: titleText,
-                description: descriptionText,
-                date: date,
-                placeID: knownPlace.id)
-            let addNoteSuccess = dataStore.addNote(newNote)
-            if !addNoteSuccess {
-                alertText = "Sorry, this note could not be added. Please try again later!"
-                isAlerting = true
-            }
-        case let .location(newLocation):
-            let newPlace = Place(
-                id: Place.uniqueId(),
-                name: newLocation.name,
-                latitude: newLocation.latitude,
-                longitude: newLocation.longitude,
-                categories: newLocation.categories,
-                isFavourite: false)
-            let addPlaceSuccess = dataStore.addPlace(newPlace)
-            if !addPlaceSuccess {
-                alertText = "Sorry, this location could not be added. Please try again later!"
-                isAlerting = true
-            }
-            let newNote = Note(
-                id: Note.uniqueId(),
-                title: titleText,
-                description: descriptionText,
-                date: date,
-                placeID: newPlace.id)
-            let addNoteSuccess = dataStore.addNote(newNote)
-            if !addNoteSuccess {
-                alertText = "Sorry, this note could not be added. Please try again later!"
-                isAlerting = true
-            }
-        }
-        if !isAlerting {
+    func saveChanges() {
+        let newNoteValue = Note(id: note.id, title: titleText, description: descriptionText, date: date, placeID: note.placeID)
+        let success = dataStore.updateNote(newNoteValue)
+        if !success {
+            isAlerting = true
+        } else {
             dismiss()
         }
     }
-}
-
-#Preview {
-    NewNoteView(
-        attachedLocation: .location(LocationData(
-            name: "Place Name",
-            categories: ["entertainment.activity_park", "airport.international", "commercial.outdoor_and_sport"],
-            latitude: 100,
-            longitude: -100,
-            country: "Australia")))
 }

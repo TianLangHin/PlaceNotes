@@ -116,4 +116,13 @@ enum MapPoint {
             return locationData.name
         }
     }
+
+    var categories: [String] {
+        switch self {
+        case let .place(placeData):
+            return placeData.categories
+        case let .location(locationData):
+            return locationData.categories
+        }
+    }
 }

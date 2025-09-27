@@ -36,6 +36,12 @@ class DataStoreViewModel: ObservableObject {
         return success
     }
 
+    func updateNote(_ note: Note) -> Bool {
+        let success = self.dbManager.updateNote(note)
+        self.refresh()
+        return success
+    }
+
     func deleteNote(by id: Int) -> Bool {
         let success = self.dbManager.deleteNote(by: id)
         self.refresh()
@@ -75,5 +81,9 @@ class DataStoreViewModel: ObservableObject {
 
     func getPlace(by id: Int) -> Place? {
         return self.places.first(where: { $0.id == id })
+    }
+
+    func getNote(by id: Int) -> Note? {
+        return self.notes.first(where: { $0.id == id })
     }
 }

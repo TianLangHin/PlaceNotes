@@ -12,6 +12,8 @@ struct NoteBriefView: View {
     @State var note: Note
     @State var showPlace: Bool = true
 
+    @State var isShowingSheet = false
+
     var dateFormatter: DateFormatter {
         let df = DateFormatter()
         df.dateFormat = "dd MMM yyyy"
@@ -20,10 +22,19 @@ struct NoteBriefView: View {
 
     var body: some View {
         VStack {
-            Text(note.title)
-                .font(.title3)
-                .fontWeight(.bold)
-                .padding()
+            HStack {
+                Spacer()
+                Text(note.title)
+                    .font(.title3)
+                    .fontWeight(.bold)
+                    .padding()
+                Spacer()
+                Button {
+                    isShowingSheet.toggle()
+                } label: {
+                    Image(systemName: "pencil.line")
+                }
+            }
             HStack {
                 if showPlace {
                     let place = dataStore.getPlace(by: note.placeID)
@@ -41,6 +52,13 @@ struct NoteBriefView: View {
             }
             Text(note.description)
                 .padding()
+        }
+        .sheet(isPresented: $isShowingSheet, onDismiss: {
+            if let newNote = dataStore.getNote(by: note.id) {
+                note = newNote
+            }
+        }) {
+            EditNoteView(note: note, attachedPlace: dataStore.getPlace(by: note.placeID))
         }
     }
 }

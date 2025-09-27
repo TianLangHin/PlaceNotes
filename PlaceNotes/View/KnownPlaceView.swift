@@ -32,19 +32,29 @@ struct KnownPlaceView: View {
                     .padding()
                 toggleFavouriteButton()
             }
-            Text("Existing Notes")
+            let relevantNotes = dataStore.notes.filter { note in
+                note.placeID == place.id
+            }
+            Text("Existing Notes: \(relevantNotes.count)")
                 .fontWeight(.bold)
                 .font(.title3)
             List {
-                let relevantNotes = dataStore.notes.filter { note in
-                    note.placeID == place.id
-                }
                 if relevantNotes.isEmpty {
                     Text("No existing notes!")
                 } else {
                     ForEach(relevantNotes) { note in
                         NoteBriefView(note: note, showPlace: false)
                             .environmentObject(dataStore)
+                    }
+                    .onDelete { indexSet in
+                        for index in indexSet {
+                            let _ = dataStore.deleteNote(by: relevantNotes[index].id)
+                        }
+                        let _ = dataStore.clearUnusedPlaces()
+                        let noMoreNotes = dataStore.notes.allSatisfy { note in note.placeID != place.id }
+                        if !isFavourite && noMoreNotes {
+                            dismiss()
+                        }
                     }
                 }
             }
