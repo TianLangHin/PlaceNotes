@@ -38,14 +38,22 @@ struct SearchView: View {
                 let results = searchVM.results(searchQuery, fromNotes: isSearchingNotes, dataStore: dataStore)
                 switch results {
                 case .notes(let notesArray):
-                    ForEach(notesArray) { note in
-                        NoteBriefView(note: note)
-                            .environmentObject(dataStore)
+                    if notesArray.isEmpty {
+                        Text("No notes recorded!")
+                    } else {
+                        ForEach(notesArray) { note in
+                            NoteBriefView(note: note)
+                                .environmentObject(dataStore)
+                        }
                     }
                 case .places(let placesArray):
-                    ForEach(placesArray) { place in
-                        PlaceBriefView(place: place)
-                            .environmentObject(dataStore)
+                    if placesArray.isEmpty {
+                        Text("No places recorded!")
+                    } else {
+                        ForEach(placesArray) { place in
+                            PlaceBriefView(place: place)
+                                .environmentObject(dataStore)
+                        }
                     }
                 }
             }

@@ -43,7 +43,7 @@ struct NewNoteView: View {
                     ForEach(categories, id: \.self) { category in
                         Text(category)
                             .padding()
-                            .background(Color.green, in: Capsule())
+                            .overlay(Capsule().stroke(Color.black, lineWidth: 1))
                     }
                 }
                 .padding()
