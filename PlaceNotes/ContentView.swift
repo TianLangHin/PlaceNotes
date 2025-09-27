@@ -24,6 +24,12 @@ struct ContentView: View {
                     Image(systemName: "map")
                     Text("Map")
                 }
+            SearchView()
+                .environmentObject(dataStore)
+                .tabItem {
+                    Image(systemName: "magnifyingglass")
+                    Text("Search Notes")
+                }
             AllNotesView()
                 .environmentObject(dataStore)
                 .tabItem {

@@ -10,7 +10,6 @@ import SwiftUI
 struct EditNoteView: View {
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var dataStore: DataStoreViewModel
-    @State var converter = CategoriesViewModel()
 
     @State var note: Note
     @State var attachedPlace: Place?
@@ -30,23 +29,6 @@ struct EditNoteView: View {
                     .font(.title)
                     .padding()
                 Spacer()
-            }
-            HStack {
-                Spacer()
-                Text("Categories")
-                    .fontWeight(.bold)
-                Spacer()
-            }
-            ScrollView(.horizontal, showsIndicators: true) {
-                HStack {
-                    let categories = converter.categoryNames(attachedPlace?.categories ?? [])
-                    ForEach(categories, id: \.self) { category in
-                        Text(category)
-                            .padding()
-                            .background(Color.green, in: Capsule())
-                    }
-                }
-                .padding()
             }
             HStack {
                 Text("Note Title")

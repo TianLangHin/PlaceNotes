@@ -10,6 +10,7 @@ import SwiftUI
 struct KnownPlaceView: View {
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var dataStore: DataStoreViewModel
+    @State var converter = CategoriesViewModel()
 
     @State var place: Place
 
@@ -34,6 +35,24 @@ struct KnownPlaceView: View {
             }
             let relevantNotes = dataStore.notes.filter { note in
                 note.placeID == place.id
+            }
+            HStack {
+                Spacer()
+                Text("Categories")
+                    .fontWeight(.bold)
+                    .font(.title3)
+                Spacer()
+            }
+            ScrollView(.horizontal, showsIndicators: true) {
+                HStack {
+                    let categories = converter.categoryNames(place.categories)
+                    ForEach(categories, id: \.self) { category in
+                        Text(category)
+                            .padding()
+                            .overlay(Capsule().stroke(Color.black, lineWidth: 1))
+                    }
+                }
+                .padding()
             }
             Text("Existing Notes: \(relevantNotes.count)")
                 .fontWeight(.bold)
