@@ -92,13 +92,15 @@ struct KnownPlaceView: View {
                 latitude: place.latitude,
                 longitude: place.longitude,
                 categories: place.categories,
-                isFavourite: !place.isFavourite)
+                isFavourite: isFavourite)
             let updateSuccess = dataStore.updatePlace(toggledPlace)
             if !updateSuccess {
                 alertText = "Could not toggle the favourite status! Please try again later."
                 isAlerting = true
             }
-            if !isFavourite && dataStore.notes.allSatisfy({ $0.placeID != place.id }) {
+            let noMoreNotes = dataStore.notes.allSatisfy { note in note.placeID != place.id }
+            if !isFavourite && noMoreNotes {
+                let _ = dataStore.clearUnusedPlaces()
                 dismiss()
             }
         } label: {

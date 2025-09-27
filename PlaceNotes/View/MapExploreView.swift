@@ -60,9 +60,7 @@ struct MapExploreView: View {
                         .tag(annotation)
                     }
                 }
-                .sheet(item: $selectedPlace, onDismiss: {
-                    let _ = dataStore.clearUnusedPlaces()
-                }) { selectedPlace in
+                .sheet(item: $selectedPlace) { selectedPlace in
                     switch selectedPlace.mapPoint {
                     case let .place(knownPlace):
                         KnownPlaceView(place: knownPlace)
