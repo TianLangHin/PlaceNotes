@@ -51,7 +51,7 @@ class DatabaseManager {
                 Name TEXT NOT NULL,
                 Latitude REAL NOT NULL,
                 Longitude REAL NOT NULL,
-                Categories TEXT,
+                Categories TEXT NOT NULL,
                 Favourite BOOL NOT NULL
             );
         """
@@ -277,7 +277,8 @@ class DatabaseManager {
             let name = String(cString: sqlite3_column_text(selectStatement, 1))
             let latitude = sqlite3_column_double(selectStatement, 2)
             let longitude = sqlite3_column_double(selectStatement, 3)
-            let categories = String(cString: sqlite3_column_text(selectStatement, 4)).split(separator: ",").map { String($0) }
+            let c = String(cString: sqlite3_column_text(selectStatement, 4))
+            let categories = c.split(separator: ",").map { String($0) }
             let isFavourite = sqlite3_column_int(selectStatement, 5) != 0
             let place = Place(
                 id: placeId,

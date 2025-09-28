@@ -54,8 +54,10 @@ class MapViewModel: ObservableObject {
         let field = CircleQuery(lon: longitude, lat: latitude, radiusMetres: 5000)
         let params = LocationParams(category: category, filter: .circle(field), queryLimit: Int(self.locationQueryLimit))
         let locations = await locationFetcher.fetch(params) ?? []
-        self.annotations = locations.map { location in
-            PlaceAnnotation(mapPoint: .location(location))
+        await MainActor.run {
+            self.annotations = locations.map { location in
+                PlaceAnnotation(mapPoint: .location(location))
+            }
         }
         return locations.isEmpty
     }
