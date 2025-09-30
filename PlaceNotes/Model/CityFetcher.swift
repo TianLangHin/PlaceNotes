@@ -61,9 +61,10 @@ struct CityParams {
     let queryLimit: Int
 }
 
-/// The API is expected to return a list of JSON objects
+/// The API is expected to return a list of `CityData` objects which are represented via JSON,
 /// each representing a city that potentially matches the query.
-struct CityData: Codable {
+/// It is also made hashable so it can be used directly in a ForEach component.
+struct CityData: Codable, Hashable {
     // All that is required for this app's purpose is the name, coordinates, and country it belongs to.
     let city: String
     let latitude: Double

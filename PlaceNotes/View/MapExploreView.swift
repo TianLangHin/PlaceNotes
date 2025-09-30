@@ -11,7 +11,7 @@ import SwiftUI
 struct MapExploreView: View {
     @State var citySearch = ""
     @State var resultsText = "Start searching to find cities!"
-    @State var lastQuery: [IdWrapper<CityData>] = []
+    @State var lastQuery: [CityData] = []
 
     @State var selectedPlace: PlaceAnnotation? = nil
 
@@ -118,8 +118,7 @@ struct MapExploreView: View {
                 Spacer()
                 Button {
                     Task {
-                        let cities = await mapViewModel.searchCity(citySearch)
-                        lastQuery = cities.map { IdWrapper(data: $0) }
+                        lastQuery = await mapViewModel.searchCity(citySearch)
                         citySearch = ""
                         resultsText = "Found cities: \(lastQuery.count)"
                     }
@@ -129,8 +128,7 @@ struct MapExploreView: View {
                 .buttonStyle(.borderedProminent)
             }
             Menu {
-                ForEach(lastQuery) { cityData in
-                    let city = cityData.data
+                ForEach(lastQuery, id: \.self) { city in
                     Button {
                         mapViewModel.setLocationTo(latitude: city.latitude, longitude: city.longitude)
                     } label: {
