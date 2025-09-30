@@ -34,7 +34,7 @@ struct RankedNotesView: View {
                         note1.date < note2.date
                     })
                     Section {
-                        ForEach(rankedNotes.filter { $0.date < Date() }) { note in
+                        ForEach(rankedNotes.filter { $0.date < Date() }, id: \.self) { note in
                             NoteBriefView(note: note)
                                 .environmentObject(dataStore)
                         }
@@ -52,7 +52,7 @@ struct RankedNotesView: View {
                         }
                     }
                     Section {
-                        ForEach(rankedNotes.filter { $0.date >= Date() }) { note in
+                        ForEach(rankedNotes.filter { $0.date >= Date() }, id: \.self) { note in
                             NoteBriefView(note: note)
                                 .environmentObject(dataStore)
                         }
@@ -70,6 +70,9 @@ struct RankedNotesView: View {
                         }
                     }
                 }
+            }
+            .onAppear {
+                dataStore.refresh()
             }
             .listStyle(.inset)
         }

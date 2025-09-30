@@ -41,7 +41,7 @@ struct SearchView: View {
                     if notesArray.isEmpty {
                         Text("No notes recorded!")
                     } else {
-                        ForEach(notesArray) { note in
+                        ForEach(notesArray, id: \.self) { note in
                             NoteBriefView(note: note)
                                 .environmentObject(dataStore)
                         }
@@ -50,7 +50,7 @@ struct SearchView: View {
                     if placesArray.isEmpty {
                         Text("No places recorded!")
                     } else {
-                        ForEach(placesArray) { place in
+                        ForEach(placesArray, id: \.self) { place in
                             PlaceBriefView(place: place)
                                 .environmentObject(dataStore)
                         }

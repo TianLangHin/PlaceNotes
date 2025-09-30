@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Note: Identifiable, IdGeneratable {
+struct Note: Hashable, IdGeneratable {
     let id: Int
     var title: String
     var description: String

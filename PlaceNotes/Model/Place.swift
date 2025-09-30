@@ -5,7 +5,7 @@
 //  Created by Tian Lang Hin on 23/9/2025.
 //
 
-struct Place: Identifiable, IdGeneratable {
+struct Place: Hashable, IdGeneratable {
     let id: Int
     let name: String
     let latitude: Double

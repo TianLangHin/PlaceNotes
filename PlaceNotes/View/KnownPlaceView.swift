@@ -61,7 +61,7 @@ struct KnownPlaceView: View {
                 if relevantNotes.isEmpty {
                     Text("No existing notes!")
                 } else {
-                    ForEach(relevantNotes) { note in
+                    ForEach(relevantNotes, id: \.self) { note in
                         NoteBriefView(note: note, showPlace: false)
                             .environmentObject(dataStore)
                     }
