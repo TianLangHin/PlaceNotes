@@ -20,12 +20,15 @@ struct ContentView: View {
     /// to adjust the settings of the queries made while navigating the map.
     @ObservedObject var mapViewModel = MapViewModel()
 
+    // By default, make the first page of the app the map that visualises notes.
+    @State var selection = 2
+
     var body: some View {
         /// The main four pages of the app are presented with matching icons.
         /// All four of the pages will be provided `dataStore` as an
         /// EnvironmentObject, so that they can have access to the global
         /// single source of truth.
-        TabView {
+        TabView(selection: $selection) {
             /// The first page of the app is a summary of all the notes recorded,
             /// ordering on their dates so that the user can see which notes
             /// or reminders are most urgent.
@@ -37,6 +40,7 @@ struct ContentView: View {
                     Image(systemName: "bell.fill")
                     Text("Notes")
                 }
+                .tag(1)
             /// The second page is the most interactive page where the user
             /// interacts with a map, visualising the distribution of their notes.
             MapExploreView()
@@ -48,6 +52,7 @@ struct ContentView: View {
                     Image(systemName: "map")
                     Text("Map")
                 }
+                .tag(2)
             /// The third page allows a more conventional searching within the user's
             /// notes, in case the user has many notes that cannot be easily
             /// visualised in full completion within the map.
@@ -59,6 +64,7 @@ struct ContentView: View {
                     Image(systemName: "magnifyingglass")
                     Text("Search Notes")
                 }
+                .tag(3)
             /// The final page provides setting customisations as well as
             /// basic information about the app. These customisations
             /// will affect the functionality of `MapExploreView`,
@@ -73,6 +79,7 @@ struct ContentView: View {
                     Image(systemName: "info.circle")
                     Text("App Info")
                 }
+                .tag(4)
         }
     }
 }
