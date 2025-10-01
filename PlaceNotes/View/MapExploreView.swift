@@ -46,8 +46,11 @@ struct MapExploreView: View {
             // are at the top of the view. Each are implemented as a sub-view.
             VStack(spacing: 0) {
                 citySearchBar()
+                Divider()
+                    .overlay(.black)
                 placeSearchBar()
             }
+            .border(.gray, width: 1)
             // Zoom buttons are overlaid on the map, hence the Map is in a ZStack.
             ZStack {
                 // The map is the main feature of the UI.
@@ -215,8 +218,6 @@ struct MapExploreView: View {
             .frame(maxWidth: .infinity)
         }
         .padding()
-        .border(.black, width: 2)
-        // The strong surrounding border indicates an individual functionality to the user.
     }
 
     // A sub-view that allows the user to search for nearby places of a particular category
@@ -290,8 +291,6 @@ struct MapExploreView: View {
             }
         }
         .padding()
-        .border(.black, width: 2)
-        // The strong surrounding border indicates an individual functionality to the user.
     }
 }
 
