@@ -70,6 +70,15 @@ struct CityData: Codable, Hashable {
     let latitude: Double
     let longitude: Double
     let country: String
+
+    // Since the latitude and longitude are returned with the JSON keys "lat" and "lon",
+    // CodingKeys is used to convert this convention.
+    enum CodingKeys: String, CodingKey {
+        case city = "city"
+        case latitude = "lat"
+        case longitude = "lon"
+        case country = "country"
+    }
 }
 
 /// Since the API returns a JSON of a structure `{ features: [{ properties: <actual city data> }] }`,
